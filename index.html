@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Час після війни — Liquid Glass Memorial</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            --blob-color: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --accent-color: #00d2ff;
+            --card-border: rgba(255, 255, 255, 0.2);
+            --flame-color: #ff9900; /* Колір вогню */
+            --wax-color: #e0e0e0;   /* Колір воску */
+        }
+
+        body.light-theme {
+            --bg-gradient: linear-gradient(45deg, #e0eafc, #cfdef3);
+            --blob-color: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --text-color: #2c3e50;
+            --accent-color: #e91e63;
+            --card-border: rgba(255, 255, 255, 0.5);
+            --wax-color: #f5f5f5;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            transition: all 0.5s ease;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: var(--blob-color);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 15s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-30%, -30%); }
+            to { transform: translate(30%, 30%); }
+        }
+
+        /* Обгортка для двох карток, щоб ставити їх поруч */
+        .content-wrapper {
+            display: flex;
+            gap: 25px;
+            align-items: stretch;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .glass-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            text-align: center;
+            flex: 2 1 600px; /* Основна картка ширша */
+        }
+
+        /* Стилі для нової меморіальної картки */
+        .memorial-card {
+            flex: 1 1 300px; /* Меморіальна картка вужча */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .counter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .unit {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 20px;
+            flex: 1 1 150px;
+            min-width: 140px;
+            transition: transform 0.3s ease, background 0.3s;
+            cursor: pointer;
+        }
+
+        .unit:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .number {
+            display: block;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-color);
+            white-space: nowrap;
+        }
+
+        .label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--glass-bg);
+            color: var(--text-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- СТИЛІ ДЛЯ СВІЧКИ --- */
+        .candle-container {
+            position: relative;
+            width: 60px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        /* Тіло свічки */
+        .wax {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80%;
+            background: var(--wax-color);
+            border-radius: 8px;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Гніт */
+        .wick {
+            position: absolute;
+            bottom: 80%;
+            left: 50%;
+            width: 4px;
+            height: 15px;
+            background: #333;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Полум'я */
+        .flame {
+            position: absolute;
+            bottom: 90%;
+            left: 50%;
+            width: 24px;
+            height: 40px;
+            background: var(--flame-color);
+            border-radius: 50% 50% 20% 20%; /* Форма краплі */
+            transform: translateX(-50%);
+            filter: blur(1px);
+            animation: flicker 0.8s infinite alternate ease-in-out;
+            box-shadow: 0 0 20px var(--flame-color), 0 0 60px var(--flame-color); /* Світіння */
+        }
+
+        /* Анімація мерехтіння */
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+            100% { transform: translateX(-50%) scale(1.1, 1.2) rotate(2deg); opacity: 1; }
+        }
+
+        /* Стилі для блоку втрат */
+        .casualties-data {
+            text-align: center;
+        }
+        .casualties-number {
+            display: block;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--flame-color); /* Колір цифр як у вогню */
+            text-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
+        }
+        .casualties-label {
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .casualties-sublabel {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        /* Стилі плашки з Вікіпедії (без змін) */
+        .tooltip {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: var(--text-color);
+            font-size: 0.9em;
+            line-height: 1.4;
+            max-width: 320px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+            text-align: left;
+        }
+        .tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .tooltip strong {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 5px;
+        }
+        .wiki-source {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8em;
+            opacity: 0.6;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="control-btn" id="theme-btn" onclick="toggleTheme()" title="Змінити тему">☀️</button>
+        <button class="control-btn" id="lang-btn" onclick="toggleLanguage()" title="Змінити мову / Change Language">🇬🇧</button>
+    </div>
+
+    <div class="blob"></div>
+
+    <div class="content-wrapper">
+        
+        <div class="glass-container">
+            <h2 id="main-title" style="font-weight: 300;">Час з моменту завершення Другої світової війни</h2>
+            <div class="counter-grid">
+                <div class="unit"><span class="number" id="decades">-</span><span class="label" id="lbl-decades">Десятиліття</span></div>
+                <div class="unit"><span class="number" id="years">-</span><span class="label" id="lbl-years">Роки</span></div>
+                <div class="unit"><span class="number" id="months">-</span><span class="label" id="lbl-months">Всього місяців</span></div>
+                <div class="unit"><span class="number" id="weeks">-</span><span class="label" id="lbl-weeks">Тижні</span></div>
+                <div class="unit"><span class="number" id="days">-</span><span class="label" id="lbl-days">Дні</span></div>
+                <div class="unit"><span class="number" id="hours">-</span><span class="label" id="lbl-hours">Години</span></div>
+                <div class="unit" style="flex-basis: 100%;"><span class="number" id="seconds">-</span><span class="label" id="lbl-seconds">Секунди</span></div>
+            </div>
+        </div>
+
+        <div class="glass-container memorial-card">
+            <div class="candle-container">
+                <div class="wax"></div>
+                <div class="wick"></div>
+                <div class="flame"></div>
+            </div>
+            <div class="casualties-data">
+                <span class="casualties-label" id="lbl-casualties-title">Орієнтовні втрати</span>
+                <span class="casualties-number">~70-85 млн</span>
+                <span class="casualties-sublabel" id="lbl-casualties-sub">Військові та цивільні (оцінка)</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="history-tooltip" class="tooltip"></div>
+
+    <script>
+        const wikiTopics = {
+            uk: [
+                'Друга світова війна', 'Сталінградська битва', 'Висадка в Нормандії', 
+                'Вінстон Черчилль', 'Енігма (автомат)', 'Мангеттенський проєкт', 'Битва за Мідвей', 
+                'Напад на Перл-Гарбор', 'Антигітлерівська коаліція', 'Битва за Британію', 
+                'Операція «Барбаросса»', 'Курська битва', 'Ялтинська конференція', 
+                'Франклін Делано Рузвельт', 'Ядерне бомбардування Хіросіми та Наґасакі'
+            ],
+            en: [
+                'World War II', 'Battle of Stalingrad', 'Normandy landings', 
+                'Winston Churchill', 'Enigma machine', 'Manhattan Project', 'Battle of Midway', 
+                'Attack on Pearl Harbor', 'Allies of World War II', 'Battle of Britain', 
+                'Operation Barbarossa', 'Battle of Kursk', 'Yalta Conference', 
+                'Franklin D. Roosevelt', 'Atomic bombings of Hiroshima and Nagasaki'
+            ]
+        };
+
+        const wikiCache = { uk: {}, en: {} };
+        const tooltip = document.getElementById('history-tooltip');
+        const units = document.querySelectorAll('.unit');
+        let currentLang = 'uk'; 
+
+        async function fetchWikiFact() {
+            const topics = wikiTopics[currentLang];
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+
+            if (wikiCache[currentLang][randomTopic]) {
+                return wikiCache[currentLang][randomTopic];
+            }
+
+            try {
+                const url = `https://${currentLang}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&explaintext=1&redirects=1&origin=*&titles=${encodeURIComponent(randomTopic)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+                let extract = pages[pageId].extract;
+
+                if (extract) {
+                    extract = extract.replace(/\s*\([^)]*\)/g, '');
+                    if (extract.length > 200) {
+                        extract = extract.substring(0, 200);
+                        extract = extract.substring(0, Math.min(extract.length, extract.lastIndexOf(" "))) + '...';
+                    }
+                } else {
+                    extract = currentLang === 'uk' ? "Коротка інформація відсутня 😔" : "Short info is missing 😔";
+                }
+
+                const resultHTML = `
+                    <strong>${randomTopic} 📚</strong>
+                    ${extract}
+                    <span class="wiki-source">Джерело: Wikipedia</span>
+                `;
+
+                wikiCache[currentLang][randomTopic] = resultHTML;
+                return resultHTML;
+
+            } catch (error) {
+                console.error("Помилка Вікіпедії:", error);
+                return currentLang === 'uk' ? "Не вдалося завантажити дані 😔" : "Failed to load data 😔";
+            }
+        }
+
+        units.forEach(unit => {
+            unit.addEventListener('mouseenter', async () => {
+                const loadingText = currentLang === 'uk' ? 'Шукаю у Вікіпедії... 🔍' : 'Searching Wikipedia... 🔍';
+                tooltip.innerHTML = loadingText;
+                tooltip.classList.add('visible');
+
+                const factHTML = await fetchWikiFact();
+                
+                if (tooltip.classList.contains('visible')) {
+                    tooltip.innerHTML = factHTML;
+                }
+            });
+
+            unit.addEventListener('mousemove', (e) => {
+                let x = e.pageX + 15;
+                let y = e.pageY + 15;
+
+                if (x + tooltip.offsetWidth > window.innerWidth) {
+                    x = e.pageX - tooltip.offsetWidth - 15;
+                }
+                if (y + tooltip.offsetHeight > window.innerHeight) {
+                    y = e.pageY - tooltip.offsetHeight - 15;
+                }
+
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+            });
+
+            unit.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('visible');
+            });
+        });
+
+        const translations = {
+            uk: {
+                title: "Час з моменту завершення Другої світової війни",
+                decades: "Десятиліття",
+                years: "Роки",
+                months: "Всього місяців",
+                weeks: "Тижні",
+                days: "Дні",
+                hours: "Години",
+                seconds: "Секунди",
+                langBtnText: "🇬🇧",
+                // Нові переклади для меморіалу
+                casualtiesTitle: "Орієнтовні втрати",
+                casualtiesSub: "Військові та цивільні (оцінка)"
+            },
+            en: {
+                title: "Time since the end of World War II",
+                decades: "Decades",
+                years: "Years",
+                months: "Total Months",
+                weeks: "Weeks",
+                days: "Days",
+                hours: "Hours",
+                seconds: "Seconds",
+                langBtnText: "🇺🇦",
+                // Нові переклади для меморіалу
+                casualtiesTitle: "Estimated Casualties",
+                casualtiesSub: "Military and civilian (estimate)"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'uk' ? 'en' : 'uk';
+            const text = translations[currentLang];
+            
+            document.getElementById('main-title').innerText = text.title;
+            document.getElementById('lbl-decades').innerText = text.decades;
+            document.getElementById('lbl-years').innerText = text.years;
+            document.getElementById('lbl-months').innerText = text.months;
+            document.getElementById('lbl-weeks').innerText = text.weeks;
+            document.getElementById('lbl-days').innerText = text.days;
+            document.getElementById('lbl-hours').innerText = text.hours;
+            document.getElementById('lbl-seconds').innerText = text.seconds;
+            
+            // Оновлюємо тексти меморіалу
+            document.getElementById('lbl-casualties-title').innerText = text.casualtiesTitle;
+            document.getElementById('lbl-casualties-sub').innerText = text.casualtiesSub;
+
+            document.getElementById('lang-btn').innerText = text.langBtnText;
+            tooltip.classList.remove('visible');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeBtn = document.getElementById('theme-btn');
+            body.classList.toggle('light-theme');
+            themeBtn.innerText = body.classList.contains('light-theme') ? '🌙' : '☀️';
+        }
+
+        function updateCounter() {
+            const startDate = new Date('1945-09-02T00:00:00');
+            const now = new Date();
+            const diffInMs = now - startDate;
+
+            const totalSeconds = Math.floor(diffInMs / 1000);
+            const totalHours = Math.floor(diffInMs / (1000 * 60 * 60));
+            const totalDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+            const totalWeeks = Math.floor(totalDays / 7);
+            
+            const totalMonths = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+            
+            let totalYears = now.getFullYear() - startDate.getFullYear();
+            if (now.getMonth() < startDate.getMonth() || (now.getMonth() === startDate.getMonth() && now.getDate() < startDate.getDate())) {
+                totalYears--;
+            }
+            
+            const totalDecades = Math.floor(totalYears / 10);
+            const locale = currentLang === 'uk' ? 'uk-UA' : 'en-US';
+
+            document.getElementById('decades').innerText = totalDecades.toLocaleString(locale);
+            document.getElementById('years').innerText = totalYears.toLocaleString(locale);
+            document.getElementById('months').innerText = totalMonths.toLocaleString(locale);
+            document.getElementById('weeks').innerText = totalWeeks.toLocaleString(locale);
+            document.getElementById('days').innerText = totalDays.toLocaleString(locale);
+            document.getElementById('hours').innerText = totalHours.toLocaleString(locale);
+            document.getElementById('seconds').innerText = totalSeconds.toLocaleString(locale);
+        }
+
+        setInterval(updateCounter, 1000);
+        updateCounter();
+    </script>
+</body>
+</html>
